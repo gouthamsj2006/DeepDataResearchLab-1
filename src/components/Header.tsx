@@ -5,6 +5,7 @@ import { useAuth } from '../hooks/useAuth';
 import { supabase } from '../lib/supabase';
 import AuthModal from './AuthModal';
 import ProfilePopup from './ProfilePopup';
+import { Link } from 'react-router-dom';
 
 interface HeaderProps {
   onNavigate: (section: string) => void;
@@ -134,14 +135,12 @@ export default function Header({ onNavigate }: HeaderProps) {
               >
                 About
               </button>
-              <a
-                href="/hiredeck"
-                target="_blank"
-                rel="noopener noreferrer"
+              <Link
+                to="/hiredeck"
                 className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors"
               >
                 HireDeck
-              </a>
+              </Link>
             </nav>
 
             {/* Right: User Profile or Sign In */}
