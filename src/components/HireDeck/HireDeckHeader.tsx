@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, User, Settings, LogOut, Building } from 'lucide-react';
 import HRProfileEditModal from './HRProfileEditModal';
 import HRSignInModal from './HRSignInModal';
+import { useNavigate } from 'react-router-dom';
 
 interface HRUser {
   id: string;
@@ -22,6 +23,7 @@ export default function HireDeckHeader({ onHRSignup }: HireDeckHeaderProps) {
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [showSignIn, setShowSignIn] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Check for HR user in localStorage
@@ -35,7 +37,7 @@ export default function HireDeckHeader({ onHRSignup }: HireDeckHeaderProps) {
     localStorage.removeItem('hr_user');
     setHrUser(null);
     setShowProfileDropdown(false);
-    window.location.reload();
+    navigate('/');
   };
 
   return (

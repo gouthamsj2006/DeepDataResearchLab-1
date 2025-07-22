@@ -7,6 +7,7 @@ import * as yup from 'yup';
 import { useAuth } from '../hooks/useAuth';
 import HRSignup from './HireDeck/HRSignup';
 import StudentSignup from './HireDeck/StudentSignup';
+import HRSignInModal from './HireDeck/HRSignInModal';
 
 const countryCodes = [
   { code: '+91', country: 'India', flag: '🇮🇳' },
@@ -49,6 +50,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showHRSignIn, setShowHRSignIn] = useState(false);
   
   const { signUp, signIn } = useAuth();
 
@@ -196,7 +198,25 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   <HRSignup onSuccess={handleClose} />
                 )
               ) : (
-                <>
+                role === null ? (
+                  <div className="flex flex-col items-center space-y-4">
+                    <p className="mb-2 text-gray-700 dark:text-gray-300">Sign in as:</p>
+                    <div className="flex space-x-4">
+                      <button
+                        onClick={() => setRole('student')}
+                        className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                      >
+                        Student
+                      </button>
+                      <button
+                        onClick={() => setRole('hr')}
+                        className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                      >
+                        HR
+                      </button>
+                    </div>
+                  </div>
+                ) : role === 'student' ? (
                   <form onSubmit={signInForm.handleSubmit(handleSignIn)} className="space-y-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -243,25 +263,9 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                       {loading ? 'Signing In...' : 'Sign In'}
                     </button>
                   </form>
-
-                  {/* User Details Summary after sign in (if available) */}
-                  {/* This assumes you have access to user details in context or props. Adjust as needed. */}
-                  {/* Example: */}
-                  {/*
-                  {user && (
-                    <div className="mt-6 p-4 rounded-lg bg-gray-100 dark:bg-gray-700">
-                      <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-white">Your Details</h3>
-                      <div className="grid grid-cols-1 gap-2 text-sm">
-                        <div><span className="font-medium">Name:</span> {user.user_metadata?.full_name || 'N/A'}</div>
-                        <div><span className="font-medium">Email:</span> {user.email}</div>
-                        <div><span className="font-medium">Phone:</span> {user.user_metadata?.phoneNumber || 'N/A'}</div>
-                        <div><span className="font-medium">Degree:</span> {user.user_metadata?.degree || 'N/A'}</div>
-                        <div><span className="font-medium">Selected Course:</span> {user.user_metadata?.course ? user.user_metadata.course : <span className="italic text-gray-500">No course selected</span>}</div>
-                      </div>
-                    </div>
-                  )}
-                  */}
-                </>
+                ) : (
+                  <HRSignInModal isOpen={true} onClose={handleClose} setHrUser={() => {}} />
+                )
               )}
 
               <div className="mt-6 text-center">
