@@ -5,6 +5,8 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { useAuth } from '../hooks/useAuth';
+import HRSignup from './HireDeck/HRSignup';
+import StudentSignup from './HireDeck/StudentSignup';
 
 const countryCodes = [
   { code: '+91', country: 'India', flag: '🇮🇳' },
@@ -42,6 +44,7 @@ interface AuthModalProps {
 
 export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const [isSignUp, setIsSignUp] = useState(false);
+  const [role, setRole] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -76,7 +79,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
     setError('');
     
     try {
-      await signUp(data.email, data.password, {
+      const result = await signUp(data.email, data.password, {
         fullName: data.fullName,
         age: parseInt(data.age),
         phoneNumber: `${data.countryCode}${data.phoneNumber}`,
@@ -84,6 +87,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
         degree: data.degree,
       });
       
+      // Show success toast
       const toast = document.createElement('div');
       toast.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
       toast.textContent = '✅ Successfully registered! You can now explore our courses.';
@@ -118,6 +122,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
     setError('');
     setShowPassword(false);
     setShowConfirmPassword(false);
+    setRole(null);
   };
 
   const handleClose = () => {
@@ -130,160 +135,90 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
     setIsSignUp(!isSignUp);
   };
 
-  // Inline styles for hiding scrollbar but keeping scroll
-  const hideScrollbarStyle = {
-    scrollbarWidth: 'none', /* Firefox */
-    msOverflowStyle: 'none' /* IE 10+ */,
-  } as React.CSSProperties;
-
   return (
-    <>
-      {/* Global style for webkit browsers scrollbar hiding */}
-      <style>{`
-        .hide-scrollbar::-webkit-scrollbar {
-          display: none;
-        }
-      `}</style>
-
-      <AnimatePresence>
-        {isOpen && (
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+          onClick={handleClose}
+        >
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
-            onClick={handleClose}
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.9, opacity: 0 }}
+            className="w-[95%] max-w-[520px] bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
           >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="w-[90%] max-w-[500px] max-h-[80vh] overflow-y-auto hide-scrollbar bg-white dark:bg-gray-800 rounded-xl shadow-md"
-              onClick={(e) => e.stopPropagation()}
-              style={hideScrollbarStyle}
-            >
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {isSignUp ? 'Create Account' : 'Welcome Back'}
-                  </h2>
-                  <button
-                    onClick={handleClose}
-                    className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                  {isSignUp ? (role === 'student' ? 'Student Sign Up' : role === 'hr' ? 'HR Sign Up' : 'Create Account') : 'Welcome Back'}
+                </h2>
+                <button
+                  onClick={handleClose}
+                  className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {error && (
+                <div className="mb-4 p-3 bg-red-100 dark:bg-red-900/30 border border-red-300 dark:border-red-700 rounded-lg text-red-700 dark:text-red-400 text-sm">
+                  {error}
                 </div>
+              )}
 
-                {error && (
-                  <div className="mb-4 p-3 bg-red-100 dark:bg-red-900/30 border border-red-300 dark:border-red-700 rounded-lg text-red-700 dark:text-red-400 text-sm">
-                    {error}
+              {isSignUp ? (
+                role === null ? (
+                  <div className="flex flex-col items-center space-y-4">
+                    <p className="mb-2 text-gray-700 dark:text-gray-300">Sign up as:</p>
+                    <div className="flex space-x-4">
+                      <button
+                        onClick={() => setRole('student')}
+                        className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                      >
+                        Student
+                      </button>
+                      <button
+                        onClick={() => setRole('hr')}
+                        className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                      >
+                        HR
+                      </button>
+                    </div>
                   </div>
-                )}
-
-                {isSignUp ? (
-                  <form onSubmit={signUpForm.handleSubmit(handleSignUp)} className="space-y-4">
-                    {/* Full Name */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Full Name
-                      </label>
-                      <input
-                        {...signUpForm.register('fullName')}
-                        type="text"
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                      />
-                      {signUpForm.formState.errors.fullName && (
-                        <p className="text-red-500 text-xs mt-1">{signUpForm.formState.errors.fullName.message}</p>
-                      )}
-                    </div>
-
-                    {/* Age */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Age
-                      </label>
-                      <input
-                        {...signUpForm.register('age')}
-                        type="number"
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                      />
-                      {signUpForm.formState.errors.age && (
-                        <p className="text-red-500 text-xs mt-1">{signUpForm.formState.errors.age.message}</p>
-                      )}
-                    </div>
-
-                    {/* Phone Number */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Phone Number
-                      </label>
-                      <div className="flex space-x-2">
-                        <select
-                          {...signUpForm.register('countryCode')}
-                          className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                        >
-                          {countryCodes.map((country) => (
-                            <option key={country.code} value={country.code}>
-                              {country.flag} {country.code}
-                            </option>
-                          ))}
-                        </select>
-                        <input
-                          {...signUpForm.register('phoneNumber')}
-                          type="tel"
-                          className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                        />
-                      </div>
-                      {signUpForm.formState.errors.phoneNumber && (
-                        <p className="text-red-500 text-xs mt-1">{signUpForm.formState.errors.phoneNumber.message}</p>
-                      )}
-                    </div>
-
-                    {/* Email */}
+                ) : role === 'student' ? (
+                  <StudentSignup onSuccess={handleClose} />
+                ) : (
+                  <HRSignup onSuccess={handleClose} />
+                )
+              ) : (
+                <>
+                  <form onSubmit={signInForm.handleSubmit(handleSignIn)} className="space-y-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         Email
                       </label>
                       <input
-                        {...signUpForm.register('email')}
+                        {...signInForm.register('email')}
                         type="email"
                         className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       />
-                      {signUpForm.formState.errors.email && (
-                        <p className="text-red-500 text-xs mt-1">{signUpForm.formState.errors.email.message}</p>
+                      {signInForm.formState.errors.email && (
+                        <p className="text-red-500 text-xs mt-1">{signInForm.formState.errors.email.message}</p>
                       )}
                     </div>
 
-                    {/* Degree */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Degree
-                      </label>
-                      <select
-                        {...signUpForm.register('degree')}
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                      >
-                        <option value="">Select your degree</option>
-                        {degrees.map((degree) => (
-                          <option key={degree} value={degree}>
-                            {degree}
-                          </option>
-                        ))}
-                      </select>
-                      {signUpForm.formState.errors.degree && (
-                        <p className="text-red-500 text-xs mt-1">{signUpForm.formState.errors.degree.message}</p>
-                      )}
-                    </div>
-
-                    {/* Password */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         Password
                       </label>
                       <div className="relative">
                         <input
-                          {...signUpForm.register('password')}
+                          {...signInForm.register('password')}
                           type={showPassword ? 'text' : 'password'}
                           className="w-full px-3 py-2 pr-10 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                         />
@@ -295,111 +230,52 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                           {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                         </button>
                       </div>
-                      {signUpForm.formState.errors.password && (
-                        <p className="text-red-500 text-xs mt-1">{signUpForm.formState.errors.password.message}</p>
+                      {signInForm.formState.errors.password && (
+                        <p className="text-red-500 text-xs mt-1">{signInForm.formState.errors.password.message}</p>
                       )}
                     </div>
 
-                    {/* Confirm Password */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Confirm Password
-                      </label>
-                      <div className="relative">
-                        <input
-                          {...signUpForm.register('confirmPassword')}
-                          type={showConfirmPassword ? 'text' : 'password'}
-                          className="w-full px-3 py-2 pr-10 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-                        >
-                          {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                        </button>
-                      </div>
-                      {signUpForm.formState.errors.confirmPassword && (
-                        <p className="text-red-500 text-xs mt-1">{signUpForm.formState.errors.confirmPassword.message}</p>
-                      )}
-                    </div>
-
-                    {/* Submit button */}
                     <button
                       type="submit"
                       disabled={loading}
                       className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-medium rounded-lg transition-colors"
                     >
-                      {loading ? 'Creating Account...' : 'Create Account'}
+                      {loading ? 'Signing In...' : 'Sign In'}
                     </button>
                   </form>
-                ) : (
-                  <>
-                    <form onSubmit={signInForm.handleSubmit(handleSignIn)} className="space-y-4">
-                      {/* Email */}
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                          Email
-                        </label>
-                        <input
-                          {...signInForm.register('email')}
-                          type="email"
-                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                        />
-                        {signInForm.formState.errors.email && (
-                          <p className="text-red-500 text-xs mt-1">{signInForm.formState.errors.email.message}</p>
-                        )}
+
+                  {/* User Details Summary after sign in (if available) */}
+                  {/* This assumes you have access to user details in context or props. Adjust as needed. */}
+                  {/* Example: */}
+                  {/*
+                  {user && (
+                    <div className="mt-6 p-4 rounded-lg bg-gray-100 dark:bg-gray-700">
+                      <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-white">Your Details</h3>
+                      <div className="grid grid-cols-1 gap-2 text-sm">
+                        <div><span className="font-medium">Name:</span> {user.user_metadata?.full_name || 'N/A'}</div>
+                        <div><span className="font-medium">Email:</span> {user.email}</div>
+                        <div><span className="font-medium">Phone:</span> {user.user_metadata?.phoneNumber || 'N/A'}</div>
+                        <div><span className="font-medium">Degree:</span> {user.user_metadata?.degree || 'N/A'}</div>
+                        <div><span className="font-medium">Selected Course:</span> {user.user_metadata?.course ? user.user_metadata.course : <span className="italic text-gray-500">No course selected</span>}</div>
                       </div>
+                    </div>
+                  )}
+                  */}
+                </>
+              )}
 
-                      {/* Password */}
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                          Password
-                        </label>
-                        <div className="relative">
-                          <input
-                            {...signInForm.register('password')}
-                            type={showPassword ? 'text' : 'password'}
-                            className="w-full px-3 py-2 pr-10 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => setShowPassword(!showPassword)}
-                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-                          >
-                            {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                          </button>
-                        </div>
-                        {signInForm.formState.errors.password && (
-                          <p className="text-red-500 text-xs mt-1">{signInForm.formState.errors.password.message}</p>
-                        )}
-                      </div>
-
-                      {/* Submit button */}
-                      <button
-                        type="submit"
-                        disabled={loading}
-                        className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-medium rounded-lg transition-colors"
-                      >
-                        {loading ? 'Signing In...' : 'Sign In'}
-                      </button>
-                    </form>
-                  </>
-                )}
-
-                <div className="mt-6 text-center">
-                  <button
-                    onClick={switchMode}
-                    className="text-blue-600 dark:text-blue-400 hover:underline text-sm"
-                  >
-                    {isSignUp ? 'Already have an account? Sign in' : "Don't have an account? Sign up"}
-                  </button>
-                </div>
+              <div className="mt-6 text-center">
+                <button
+                  onClick={switchMode}
+                  className="text-blue-600 dark:text-blue-400 hover:underline text-sm"
+                >
+                  {isSignUp ? 'Already have an account? Sign in' : "Don't have an account? Sign up"}
+                </button>
               </div>
-            </motion.div>
+            </div>
           </motion.div>
-        )}
-      </AnimatePresence>
-    </>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }

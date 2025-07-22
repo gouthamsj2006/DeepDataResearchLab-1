@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, User, Settings, LogOut, Building } from 'lucide-react';
+import HRProfileEditModal from './HRProfileEditModal';
+import HRSignInModal from './HRSignInModal';
 
 interface HRUser {
   id: string;
@@ -15,9 +17,11 @@ interface HireDeckHeaderProps {
   onStudentSignup: () => void;
 }
 
-export default function HireDeckHeader({ onHRSignup, onStudentSignup }: HireDeckHeaderProps) {
+export default function HireDeckHeader({ onHRSignup }: HireDeckHeaderProps) {
   const [hrUser, setHrUser] = useState<HRUser | null>(null);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+  const [showEditProfile, setShowEditProfile] = useState(false);
+  const [showSignIn, setShowSignIn] = useState(false);
 
   useEffect(() => {
     // Check for HR user in localStorage
@@ -101,7 +105,10 @@ export default function HireDeckHeader({ onHRSignup, onStudentSignup }: HireDeck
                       </div>
                       
                       <div className="p-2">
-                        <button className="w-full flex items-center space-x-2 px-3 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                        <button
+                          onClick={() => setShowEditProfile(true)}
+                          className="w-full flex items-center space-x-2 px-3 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                        >
                           <Settings className="w-4 h-4 text-gray-400" />
                           <span className="text-sm text-gray-700 dark:text-gray-300">Edit Profile</span>
                         </button>
@@ -117,27 +124,28 @@ export default function HireDeckHeader({ onHRSignup, onStudentSignup }: HireDeck
                     </motion.div>
                   )}
                 </AnimatePresence>
+                <HRProfileEditModal isOpen={showEditProfile} onClose={() => setShowEditProfile(false)} hrUser={hrUser} setHrUser={setHrUser} />
               </div>
             ) : (
               /* Auth Buttons */
               <div className="flex items-center space-x-3">
                 <motion.button
-                  onClick={onStudentSignup}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="px-4 py-2 text-green-600 dark:text-green-400 border border-green-600 dark:border-green-400 rounded-lg hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors font-medium"
-                >
-                  Student Signup
-                </motion.button>
-                
-                <motion.button
-                  onClick={onHRSignup}
+                  onClick={() => setShowSignIn(true)}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all font-medium shadow-lg"
                 >
+                  HR Sign In
+                </motion.button>
+                <motion.button
+                  onClick={onHRSignup}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="px-4 py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors font-medium"
+                >
                   HR Signup
                 </motion.button>
+                <HRSignInModal isOpen={showSignIn} onClose={() => setShowSignIn(false)} setHrUser={setHrUser} />
               </div>
             )}
           </div>
