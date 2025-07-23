@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, User, Settings, LogOut, Building } from 'lucide-react';
 import HRProfileEditModal from './HRProfileEditModal';

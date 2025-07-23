@@ -1,0 +1,8 @@
+FastAPI
+uvicorn
+python-multipart
+supabase
+PyMuPDF
+sqlalchemy
+asyncpg
+dotenv
