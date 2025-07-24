@@ -109,8 +109,8 @@ export default function HRSignup({ onSuccess }: HRSignupProps) {
 
         // Redirect to HireDeck in new tab
         setTimeout(() => {
-          window.open('/hiredeck', '_blank');
-          onSuccess();
+        navigate('/hiredeck');
+        onSuccess();
         }, 1000);
       }
     } catch (err: any) {
