@@ -10,9 +10,10 @@ interface ProfilePopupProps {
   onClose: () => void;
   userProfile: any;
   onProfileUpdate: (profile: any) => void;
+  onSignOut: () => Promise<void>;
 }
 
-export default function ProfilePopup({ isOpen, onClose, userProfile, onProfileUpdate }: ProfilePopupProps) {
+export default function ProfilePopup({ isOpen, onClose, userProfile, onProfileUpdate, onSignOut }: ProfilePopupProps) {
   const [loading, setLoading] = useState(false);
   const [showImageUploader, setShowImageUploader] = useState(false);
   const [course, setCourse] = useState('Loading...');
