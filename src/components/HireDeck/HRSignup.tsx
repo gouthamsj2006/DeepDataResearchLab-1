@@ -5,33 +5,9 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { supabase } from '../../lib/supabase';
+import { useNavigate } from 'react-router-dom';
 
-const companyTypes = [
-  'Startup',
-  'MNC',
-  'Government',
-  'Non-Profit',
-  'Consulting',
-  'Product Company',
-  'Service Company'
-];
-
-const domains = [
-  'Software Engineering',
-  'Data Engineering',
-  'Product Management',
-  'Quality Assurance',
-  'DevOps',
-  'UI/UX Design',
-  'Data Science',
-  'Machine Learning',
-  'Cybersecurity',
-  'Cloud Engineering',
-  'Mobile Development',
-  'Frontend Development',
-  'Backend Development',
-  'Full Stack Development'
-];
+// ... (keep your existing companyTypes and domains arrays)
 
 const schema = yup.object({
   name: yup.string().required('Name is required'),
@@ -51,17 +27,28 @@ export default function HRSignup({ onSuccess }: HRSignupProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const navigate = useNavigate();
 
   const { register, handleSubmit, formState: { errors } } = useForm({
     resolver: yupResolver(schema),
   });
+
+  const showToast = (message: string, isSuccess: boolean) => {
+    const toast = document.createElement('div');
+    toast.className = `fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 ${
+      isSuccess ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+    }`;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    setTimeout(() => document.body.removeChild(toast), 3000);
+  };
 
   const onSubmit = async (data: any) => {
     setLoading(true);
     setError('');
 
     try {
-      // Sign up with Supabase Auth
+      // 1. Sign up with Supabase Auth
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: data.email,
         password: data.password,
@@ -76,7 +63,7 @@ export default function HRSignup({ onSuccess }: HRSignupProps) {
       if (authError) throw authError;
 
       if (authData.user) {
-        // Create HR profile
+        // 2. Create HR profile
         const { error: profileError } = await supabase
           .from('hr_profiles')
           .insert({
@@ -91,7 +78,7 @@ export default function HRSignup({ onSuccess }: HRSignupProps) {
 
         if (profileError) throw profileError;
 
-        // Store HR session in localStorage
+        // 3. Store HR session
         localStorage.setItem('hr_user', JSON.stringify({
           id: authData.user.id,
           email: data.email,
@@ -100,21 +87,26 @@ export default function HRSignup({ onSuccess }: HRSignupProps) {
           user_type: 'hr'
         }));
 
-        // Show success message
-        const toast = document.createElement('div');
-        toast.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
-        toast.textContent = '✅ HR account created successfully!';
-        document.body.appendChild(toast);
-        setTimeout(() => document.body.removeChild(toast), 3000);
+        // 4. Show success message
+        showToast('✅ HR account created successfully!', true);
 
-        // Redirect to HireDeck in new tab
+        // 5. Redirect to HireDeck
         setTimeout(() => {
-        navigate('/hiredeck');
-        onSuccess();
+          // Option 1: Redirect in current tab (recommended)
+          navigate('/hiredeck');
+          
+          // Option 2: Open in new tab (if specifically required)
+          // const newWindow = window.open('/HireDeck', '_blank');
+          // if (!newWindow) {
+          //   navigate('/HireDeck'); // Fallback if popup blocked
+          // }
+          
+          onSuccess();
         }, 1000);
       }
     } catch (err: any) {
       setError(err.message || 'An error occurred during signup');
+      showToast(`❌ ${err.message || 'Signup failed'}`, false);
     } finally {
       setLoading(false);
     }
