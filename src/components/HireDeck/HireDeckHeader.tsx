@@ -34,11 +34,11 @@ export default function HireDeckHeader({ onHRSignup }: HireDeckHeaderProps) {
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem('hr_user');
-    setHrUser(null);
-    setShowProfileDropdown(false);
-    navigate('/');
-  };
+  localStorage.removeItem('hr_user');
+  setHrUser(null);
+  setShowProfileDropdown(false);
+  window.location.href = '/'; // Full page refresh clears all state
+};
 
   return (
     <header className="bg-white dark:bg-gray-900 shadow-lg border-b border-gray-200 dark:border-gray-700">
