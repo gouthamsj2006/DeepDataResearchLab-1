@@ -135,6 +135,12 @@ export default function Header({ onNavigate }: HeaderProps) {
               >
                 About
               </button>
+              <Link
+                to="/hiredeck"
+                className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors"
+              >
+                HireDeck
+              </Link>
             </nav>
 
             {/* Right: User Profile or Sign In */}
@@ -212,6 +218,12 @@ export default function Header({ onNavigate }: HeaderProps) {
                   >
                     About
                   </button>
+                  <Link
+                to="/hiredeck"
+                className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors"
+              >
+                HireDeck
+              </Link>
                 </nav>
               </motion.div>
             )}
