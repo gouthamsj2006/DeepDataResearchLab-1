@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'; // Removed useRef
+import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-// Removed unused lucide-react icons: Search, User, ChevronDown, LogOut, Camera
+import { Search, User, ChevronDown, LogOut, Camera } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { supabase } from '../lib/supabase';
 import AuthModal from './AuthModal';
@@ -14,10 +14,10 @@ interface HeaderProps {
 export default function Header({ onNavigate }: HeaderProps) {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showProfilePopup, setShowProfilePopup] = useState(false);
-  // Removed unused searchQuery and setSearchQuery
+  const [searchQuery, setSearchQuery] = useState('');
   const [userProfile, setUserProfile] = useState<any>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
+  
   const { user, signOut } = useAuth();
 
   // Fetch user profile data
@@ -29,7 +29,7 @@ export default function Header({ onNavigate }: HeaderProps) {
 
   const fetchUserProfile = async () => {
     if (!user) return;
-
+    
     try {
       const { data, error } = await supabase
         .from('student_profiles')
@@ -54,7 +54,7 @@ export default function Header({ onNavigate }: HeaderProps) {
           course: '',
           photo_url: '',
         };
-
+        
         const { error: insertError } = await supabase
           .from('student_profiles')
           .insert(newProfile);
@@ -76,6 +76,18 @@ export default function Header({ onNavigate }: HeaderProps) {
       console.error('Error signing out:', error);
     }
   };
+
+  const courses = [
+    'Data Engineering',
+    'Service Delivery', 
+    'Database Administrator',
+    'DevOps',
+    'Business and Process Analysis'
+  ];
+
+  const filteredCourses = courses.filter(course =>
+    course.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <>
@@ -200,11 +212,14 @@ export default function Header({ onNavigate }: HeaderProps) {
                   >
                     About
                   </button>
+                  
                 </nav>
               </motion.div>
             )}
           </AnimatePresence>
         </div>
+      </motion.header>
+
       <AuthModal 
         isOpen={showAuthModal} 
         onClose={() => setShowAuthModal(false)} 
